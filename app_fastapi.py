@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-import openai
+from openai import OpenAI
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.wait import WebDriverWait
@@ -14,7 +14,6 @@ import os
 app = FastAPI()
 
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # Hardcoded Prompt
 hardcoded_prompt = (
@@ -58,6 +57,9 @@ chat_prompt_format = (
     "Now, please respond to the following message in a similar HTML formatted structure:\n\n"
 )
 
+
+
+
 # Retrieve host IP address upon FastAPI startup
 fastApiHost_ip = socket.gethostbyname(socket.gethostname())
 print("FastAPI Host IP:", fastApiHost_ip)
@@ -71,11 +73,17 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+client = OpenAI(
+    # This is the default and can be omitted
+    api_key=os.getenv("OPENAI_API_KEY"),
+)
+
 # Function to send requests to OpenAI
 def send_to_openai(prompt):
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
+        response = client.chat.completion.create(
+            model="gpt-4o",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": prompt}
