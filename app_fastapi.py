@@ -94,7 +94,7 @@ def send_to_openai(prompt):
             n=1,
             stop=None
         )
-        return response['choices'][0]['message']['content'].strip()
+        return response.choices[0].message.content
     except Exception as e:
         print(f"Error sending request to OpenAI: {str(e)}")
         return ""
