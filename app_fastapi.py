@@ -82,7 +82,7 @@ client = OpenAI(
 # Function to send requests to OpenAI
 def send_to_openai(prompt):
     try:
-        response = client.chat.completion.create(
+        response = client.chat.completions.create(
             model="gpt-4o",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
