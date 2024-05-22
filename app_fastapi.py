@@ -74,19 +74,23 @@ app.add_middleware(
 # Function to send requests to OpenAI
 def send_to_openai(prompt):
     try:
-        response = openai.Completion.create(
-            model="gpt-4o",
-            prompt=prompt,
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": prompt}
+            ],
             max_tokens=2048,
             temperature=0.9,
             top_p=1,
             n=1,
             stop=None
         )
-        return response.choices[0].text.strip()
+        return response['choices'][0]['message']['content'].strip()
     except Exception as e:
         print(f"Error sending request to OpenAI: {str(e)}")
         return ""
+
 
 @app.post('/generate-story')
 async def generate_story(request: Request):
