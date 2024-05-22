@@ -13,8 +13,8 @@ import os
 
 app = FastAPI()
 
-# Por esto (temporalmente):
-openai.api_key = "fake-api-key"
+
+openai.api_key = s.getenv("OPENAI_API_KEY")
 
 # Hardcoded Prompt
 hardcoded_prompt = (
