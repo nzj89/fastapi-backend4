@@ -13,8 +13,6 @@ import os
 
 app = FastAPI()
 
-
-
 # Hardcoded Prompt
 hardcoded_prompt = (
     "Hi AI, we're providing a list of properties with descriptions. Each line typically represents a specific detail about the property. For instance:\n\n"
@@ -57,9 +55,6 @@ chat_prompt_format = (
     "Now, please respond to the following message in a similar HTML formatted structure:\n\n"
 )
 
-
-
-
 # Retrieve host IP address upon FastAPI startup
 fastApiHost_ip = socket.gethostbyname(socket.gethostname())
 print("FastAPI Host IP:", fastApiHost_ip)
@@ -67,7 +62,7 @@ print("FastAPI Host IP:", fastApiHost_ip)
 origins = ["http://localhost:8080", "http://192.168.1.21:8080", "https://main--nzrealstate.netlify.app", "https://nzrealstate.netlify.app"]
 
 app.add_middleware(
-       CORSMiddleware,
+    CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
@@ -75,7 +70,6 @@ app.add_middleware(
 )
 
 client = OpenAI(
-    # This is the default and can be omitted
     api_key=os.getenv("OPENAI_API_KEY"),
 )
 
@@ -83,7 +77,7 @@ client = OpenAI(
 def send_to_openai(prompt):
     try:
         response = client.chat.completions.create(
-            model="gpt-4o",
+            model="gpt-4",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": prompt}
@@ -98,7 +92,6 @@ def send_to_openai(prompt):
     except Exception as e:
         print(f"Error sending request to OpenAI: {str(e)}")
         return ""
-
 
 @app.post('/generate-story')
 async def generate_story(request: Request):
@@ -138,7 +131,7 @@ async def rank_properties(request: Request):
         print(f'Error ranking properties: {str(e)}')
         return {"rankedProperties": None, "error": str(e)}
 
-# Scrape reviews function (no changes needed)
+# Scrape reviews function with headless Chrome
 def scrape_reviews_async(url):
     print(' ** Welcome to scrape_reviews_async')
     try:
@@ -147,6 +140,12 @@ def scrape_reviews_async(url):
         # Initialize ChromeOptions
         chrome_options = Options()
         chrome_options.add_argument(f"user-agent={user_agent}")
+        chrome_options.add_argument("--headless")  # Run Chrome in headless mode
+        chrome_options.add_argument("--no-sandbox")  # Required for running as root in some environments
+        chrome_options.add_argument("--disable-dev-shm-usage")  # Overcome limited resource problems
+        chrome_options.add_argument("--disable-gpu")  # Disable GPU usage if not needed
+        chrome_options.add_argument("--window-size=1920x1080")  # Set the window size if necessary
+
         # Initialize a Selenium WebDriver (you may need to provide the path to your WebDriver executable)
         driver = webdriver.Chrome(options=chrome_options)
         # Call your function or logic here
@@ -197,7 +196,7 @@ def scrape_reviews_async(url):
 
         driver.quit()
         print("Scraping completed successfully")
-        return  scraped_data
+        return scraped_data
 
     except Exception as e:
         traceback.print_exc()
@@ -256,3 +255,4 @@ if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8000))
     uvicorn.run(app, host="0.0.0.0", port=port)
+
