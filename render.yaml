@@ -2,7 +2,14 @@ services:
   - type: web
     name: fastapi-backend
     env: python
-    buildCommand: "pip install -r requirements.txt"
+    buildCommand: |
+      apt-get update
+      apt-get install -y wget unzip
+      wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+      dpkg -i google-chrome-stable_current_amd64.deb || apt-get -fy install
+      wget -N https://chromedriver.storage.googleapis.com/91.0.4472.19/chromedriver_linux64.zip
+      unzip chromedriver_linux64.zip -d /usr/local/bin/
+      pip install -r requirements.txt
     startCommand: "uvicorn app_fastapi:app --host 0.0.0.0 --port $PORT"
     envVars:
       - key: OPENAI_API_KEY
